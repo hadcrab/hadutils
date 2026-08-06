@@ -1,3 +1,3 @@
-module github.com/hadcrab/toolbox
+module github.com/hadcrab/hadutils
 
 go 1.26.5
