@@ -10,6 +10,7 @@ import (
 type Algorithm string
 
 const (
+	UnknownAlgorithm Algorithm = ""
     SHA256 Algorithm = "sha256"
 )
 
