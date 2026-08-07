@@ -1,36 +1,55 @@
 package main
 
 import (
-	"io"
+	"errors"
+	"flag"
+	"fmt"
 	"os"
-	"fmt"	
-	// "github.com/hadcrab/hadutils/internal/hash"
+	"strings"
+
+	"github.com/hadcrab/hadutils/internal/hash"
 )
 
-func readFile(path string) (string, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return "", err
+type Config struct {
+    Path      string
+    Algorithm hash.Algorithm
+}
+
+func collectArgs() (Config, error) {
+	algo := flag.String("a", "", "algorithm")
+	flag.Parse()
+	algorithm := hash.Algorithm(strings.ToLower(*algo))
+	if algorithm == hash.UnknownAlgorithm {
+		return Config{}, errors.New("algorithm is required")
+	}
+	args := flag.Args()
+	if len(args) != 1 {
+    	return Config{}, errors.New("exactly one file path is required")
+	}
+	cfg := Config{
+		Path: args[0],
+		Algorithm: algorithm,
 	}
 	
-	data, err := io.ReadAll(file)
+	return cfg, nil
+}
+
+func run() error {
+	cfg, err := collectArgs()
 	if err != nil {
-		return "", err
+		return err
 	}
-	
-	defer file.Close()
-	
-	return string(data), nil
-} 
+	sum, err := hash.Compute(cfg.Path, cfg.Algorithm)
+	if err != nil {
+		return err
+	}
+	fmt.Printf(sum)
+	return nil
+}
 
 func main() {
-	file, err := readFile("testfile.txt")
-	if err != nil {
-		fmt.Printf("%v\n", err)
-	}
-
-	fileTest, err := os.ReadFile("testfile.txt")
-	
-	fmt.Printf(file)
-	fmt.Printf(string(fileTest))
+ if err := run(); err != nil {
+        fmt.Fprintln(os.Stderr, err)
+        os.Exit(1)
+    }
 } 
