@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/hadcrab/hadutils/internal/hash"
 )
 
@@ -14,6 +13,6 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf(sum)
+	PrintResult(cfg, sum)
 	return nil
 }
