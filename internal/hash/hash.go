@@ -1,13 +1,15 @@
 package hash
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
-	"crypto/sha1"
-	"crypto/md5"
 	"encoding/hex"
-	"os"
 	"fmt"
+	"hash"
+	"io"
+	"os"
 )
 
 type Algorithm string
@@ -21,24 +23,27 @@ const (
 )
 
 func Compute(path string, algorithm Algorithm) (string, error) {
-	data, err := os.ReadFile(path)
+	file, err := os.Open(path)
 	if err != nil {
 		return "", err
 	}
+	defer file.Close()
+	var h hash.Hash
 	switch algorithm {
 		case SHA256:
-			sum := sha256.Sum256(data)
-			return hex.EncodeToString(sum[:]), nil
+			h = sha256.New()
 		case SHA512:
-			sum := sha512.Sum512(data)
-			return hex.EncodeToString(sum[:]), nil
+			h = sha512.New()
 		case SHA1:
-			sum := sha1.Sum(data)
-			return hex.EncodeToString(sum[:]), nil
+			h = sha1.New()
 		case MD5:
-			sum := md5.Sum(data)
-			return hex.EncodeToString(sum[:]), nil
+			h = md5.New()			
 		default:
     		return "", fmt.Errorf("unsupported algorithm: %s", algorithm)
 	}
+	_, err = io.Copy(h, file)
+	if err != nil {
+		return "", err
+	}
+    return hex.EncodeToString(h.Sum(nil)), nil	
 }
