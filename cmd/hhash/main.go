@@ -9,6 +9,7 @@ import (
 type Config struct {
     Path      string
     Algorithm hash.Algorithm
+    Quiet      bool
 }
 
 func main() {
