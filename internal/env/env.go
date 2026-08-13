@@ -6,27 +6,24 @@ import (
 )
 
 type Environment struct {
-    Wayland bool
-    X11     bool
+    WaylandClipboard bool
+    X11Clipboard    bool
 }
 
 func Collect() Environment {
-	env := Environment{
-		Wayland: false,
-		X11: false,
-	}
-	_, waylandExists := os.LookupEnv("WAYLAND_DISPLAY")
-	_, x11Exists := os.LookupEnv("DISPLAY")
+	env := Environment{}
+	_, waylandClipboardExists := os.LookupEnv("WAYLAND_DISPLAY")
+	_, x11ClipboardExists := os.LookupEnv("DISPLAY")
 
-	if waylandExists {
+	if waylandClipboardExists {
 		if _, err := exec.LookPath("wl-copy"); err == nil {
-        env.Wayland = true
+        env.WaylandClipboard = true
     	}
 	}
 	
-	if x11Exists {
+	if x11ClipboardExists {
 		if _, err := exec.LookPath("xclip"); err == nil {
-        env.X11 = true
+        env.X11Clipboard = true
     	}
 	}
 	
