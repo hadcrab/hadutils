@@ -11,6 +11,7 @@ import (
 func collectArgs() (Config, error) {
 	algo := flag.String("a", "", "algorithm")
 	quiet := flag.Bool("q", false, "quiet")
+	copyToClipboard := flag.Bool("c", false, "Copy hash to clipboard")
 	flag.Parse()
 	algorithm := hash.Algorithm(strings.ToLower(*algo))
 	if algorithm == hash.UnknownAlgorithm {
@@ -24,6 +25,7 @@ func collectArgs() (Config, error) {
 		Path: args[0],
 		Algorithm: algorithm,
 		Quiet: *quiet,
+		CopyToClipboard: *copyToClipboard,
 	}
 	
 	return cfg, nil

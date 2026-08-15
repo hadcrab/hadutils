@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"os"
 	"github.com/hadcrab/hadutils/internal/hash"
+	"github.com/hadcrab/hadutils/internal/env"
 )
 
 type Config struct {
     Path      string
     Algorithm hash.Algorithm
     Quiet      bool
+    CopyToClipboard bool
 }
 
 func main() {
- if err := run(); err != nil {
+	env.Collect()
+	if err := run(); err != nil {
         fmt.Fprintln(os.Stderr, err)
-        os.Exit(1)
     }
 } 
