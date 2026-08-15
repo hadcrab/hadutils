@@ -14,7 +14,7 @@ func CopyIn(data string, clipboard env.ClipboardCapabilities) error {
 		cmd.Stdin = strings.NewReader(data)
 		err := cmd.Run()
 		if err != nil {
-			return errors.New("Cannot call Wayland clipboard backend")
+			return errors.New("could not copy to Wayland clipboard: backend failed")
 		}
 		return nil
 	}
@@ -23,7 +23,7 @@ func CopyIn(data string, clipboard env.ClipboardCapabilities) error {
 		cmd.Stdin = strings.NewReader(data)
 		err := cmd.Run()
 		if err != nil {
-			return errors.New("Cannot call X11 clipboard backend")
+			return errors.New("could not copy to X11 clipboard: backend failed")
 		}
 		return nil
 	}
