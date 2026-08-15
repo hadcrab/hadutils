@@ -5,9 +5,13 @@ import (
 	"os/exec"
 )
 
+type ClipboardCapabilities struct {
+    Wayland bool
+    X11     bool
+}
+
 type Environment struct {
-    WaylandClipboard bool
-    X11Clipboard    bool
+    Clipboard ClipboardCapabilities
 }
 
 func Collect() Environment {
@@ -17,13 +21,13 @@ func Collect() Environment {
 
 	if waylandClipboardExists {
 		if _, err := exec.LookPath("wl-copy"); err == nil {
-        env.WaylandClipboard = true
+        env.Clipboard.Wayland = true
     	}
 	}
 	
 	if x11ClipboardExists {
 		if _, err := exec.LookPath("xclip"); err == nil {
-        env.X11Clipboard = true
+        env.Clipboard.X11 = true
     	}
 	}
 	
