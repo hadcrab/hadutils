@@ -9,14 +9,11 @@ import (
 
 
 func collectArgs() (Config, error) {
-	algo := flag.String("a", "", "algorithm")
-	quiet := flag.Bool("q", false, "quiet")
-	copyToClipboard := flag.Bool("c", false, "Copy hash to clipboard")
+	algo := flag.String("a", "SHA256", "Algorithm")
+	quiet := flag.Bool("q", false, "Print only hash")
+	copyToClipboard := flag.Bool("c", false, "Quietly copy hash to clipboard")
 	flag.Parse()
 	algorithm := hash.Algorithm(strings.ToLower(*algo))
-	if algorithm == hash.UnknownAlgorithm {
-		return Config{}, errors.New("algorithm is required")
-	}
 	args := flag.Args()
 	if len(args) != 1 {
     	return Config{}, errors.New("exactly one file path is required")
