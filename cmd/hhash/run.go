@@ -1,33 +1,35 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	//"os"
 	"github.com/hadcrab/hadutils/internal/hash"
-	"github.com/hadcrab/hadutils/internal/env"
-	"github.com/hadcrab/hadutils/internal/clipboard"
+	// "github.com/hadcrab/hadutils/internal/env"
+	// "github.com/hadcrab/hadutils/internal/clipboard"
 )
 
 func run() error {
-	env := env.Collect()
+	// env := env.Collect()
 	cfg, err := collectArgs()
 	if err != nil {
 		return err
 	}
-	sum, err := hash.Compute(cfg.Path, cfg.Algorithm)
-	if err != nil {
-		return err
-	}
-	if cfg.Quiet {
-		fmt.Println(sum)
-		return nil
-	}
-	if cfg.CopyToClipboard {
-		if err := clipboard.CopyIn(sum, env.Clipboard); err != nil {
+
+	for _, path := range cfg.Path {
+		sum, err := hash.Compute(path, cfg.Algorithm)
+		if err != nil {
 			return err
+		}
+		if cfg.CopyToClipboard {
+			//todo add support for this
+			return errors.New("cannot use --copy with multiple files ")
     	}
-		return nil
+		if cfg.Quiet {
+			fmt.Println(sum)
+		} else {
+			PrintResult(path, string(cfg.Algorithm), sum)
+		}
 	}
-	PrintResult(cfg, sum)
 	return nil
 }

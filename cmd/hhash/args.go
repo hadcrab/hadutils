@@ -25,11 +25,11 @@ func collectArgs() (Config, error) {
 	algorithm := hash.Algorithm(strings.ToLower(algo))
 	args := flag.Args()
 	
-	if len(args) != 1 {
-    	return Config{}, errors.New("exactly one file path is required")
+	if len(args) < 1 {
+    	return Config{}, errors.New("At least one file path is required")
 	}
 	cfg := Config{
-		Path: args[0],
+		Path: args,
 		Algorithm: algorithm,
 		Quiet: quiet,
 		CopyToClipboard: copyToClipboard,

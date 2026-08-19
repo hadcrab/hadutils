@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func PrintResult(cfg Config, hash string) {
-	fmt.Printf("File: %s\n", cfg.Path)
-    fmt.Printf("Algorithm: %s\n", cfg.Algorithm)
+func PrintResult(path, algo, hash string) {
+	fmt.Printf("File: %s\n", path)
+    fmt.Printf("Algorithm: %s\n", algo)
     fmt.Printf("Hash: %s\n", hash)
 }
