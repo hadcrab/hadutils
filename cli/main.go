@@ -1,105 +1,51 @@
 package main
 
 import (
-	"os"
-	"strconv"
+	"slices"
+	"errors"
 	"strings"
 )
 
-type Value interface {
-    String() string
-    Set(string) error
-}
-
-type IntValue struct {
-	Value int
-}
-
-func (v *IntValue) String() string {
-    return strconv.Itoa(v.Value)
-}
-
-func (v *IntValue) Set(value string) error {
-    parsed, err := strconv.Atoi(value)
-    if err != nil {
-        return err
-    }
-
-    v.Value = parsed
-    return nil
-}
-
-type BoolValue struct {
-    Value bool
-}
-
-func (v *BoolValue) String() string {
-    return strconv.FormatBool(v.Value)
-}
-
-func (v *BoolValue) Set(value string) error {
-    parsed, err := strconv.ParseBool(value)
-    if err != nil {
-        return err
-    }
-
-    v.Value = parsed
-    return nil
-}
-
-type StringValue struct {
-    Value string
-}
-
-func (v *StringValue) String() string {
-    return v.Value
-}
-
-func (v *StringValue) Set(value string) error {
-    v.Value = value
-    return nil
-}
-
-type Argument struct {
-	Names      []string
-	Description string
-	Required bool
-	Value Value
-}
-
-func DefineArgument(names []string, desc string, isReq bool, defValue Value) Argument {
-	return Argument{
-		Names: names,
-		Description: desc,
-		Required: isReq,
-		Value: defValue,
+func (o *Option) Parse(args []string) (int, error) {
+	if len(args) == 0 {
+		return 0, errors.New("option requires a value")
 	}
+	if err := o.Value.Set(args[0]); err != nil {
+		return 0, err
+	}
+	return 1, nil
 }
 
-func ParseArgs(arguments []Argument) ([]string, error) {
-	args := os.Args[1:]
-	for argIndex, arg := range args {
-		if strings.HasPrefix(arg, "--") {
-			arg = strings.TrimPrefix(strings.TrimPrefix(arg, "--"), "-")
-			for definitionIndex := range arguments {
-				for _, argName := range arguments[definitionIndex].Names {
-					if argName == arg {
-						if argIndex+1 < len(args) {
-							arguments[definitionIndex].Value.Set(args[argIndex+1])
-						}  
-					}
+func ParseArgs(input []string, arguments []Argument) ([]string, error) {
+	var positionals []string
+	for i := 0; i < len(input); i++ {
+		token := input[i]
+		if !strings.HasPrefix(token, "-") {
+			positionals = append(positionals, token)
+			continue
+		}
+		name := strings.TrimLeft(token, "-")
+		var found *Argument
+		for argIndex := range arguments {
+			if slices.Contains(arguments[argIndex].Names, name) {
+					found = &arguments[argIndex]
 				}
+			if found != nil {
+				break
 			}
 		}
+		if found == nil {
+			return nil, errors.New("unknown argument: " + token)
+		}
+		consumed, err := found.Behavior.Parse(input[i+1:])
+		if err != nil {
+			return nil, err
+		}
+		i += consumed
 	}
+	return positionals, nil
 }
 
 func main() {
-	algorithm := DefineArgument(
-    []string{"algorithm", "a"},
-    "Hash algorithm",
-    false,
-    &StringValue{Value: "sha256"},
-	)
 	
 }
