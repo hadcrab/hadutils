@@ -75,6 +75,16 @@ type Option struct {
 	Value Value
 }
 
+func (o *Option) Parse(args []string) (int, error) {
+	if len(args) == 0 {
+		return 0, errors.New("option requires a value")
+	}
+	if err := o.Value.Set(args[0]); err != nil {
+		return 0, err
+	}
+	return 1, nil
+}
+
 type Argument struct {
 	Names       []string
 	Description string
