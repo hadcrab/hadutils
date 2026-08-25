@@ -8,6 +8,13 @@ import (
 
 func Parse(argv []string, defs ...*Argument) ([]string, error) {
 	var positionals []string
+	for i := range defs {
+    	if defs[i].hasDefault {
+        	if err := defs[i].value.Set(defs[i].deflt); err != nil {
+            	return nil, err
+         	}
+     	}
+	}
 	for i := 0; i < len(argv); i++ {
 		token := argv[i]
 		if !strings.HasPrefix(token, "-") {
