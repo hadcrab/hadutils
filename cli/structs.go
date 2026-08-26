@@ -78,6 +78,34 @@ func (o Option) Parse(args []string, set func(string) error) (int, error) {
 	return 1, set(args[0])
 }
 
+type Definition interface {
+	argument() *Argument
+}
+
+type StringArgument struct {
+	*Argument
+}
+
+type BoolArgument struct {
+	*Argument
+}
+
+type IntArgument struct {
+	*Argument
+}
+
+func (v *BoolArgument) argument() *Argument {
+	return v.Argument
+}
+
+func (v *IntArgument) argument() *Argument {
+	return v.Argument
+}
+
+func (v *StringArgument) argument() *Argument {
+	return v.Argument
+} 
+
 type Argument struct {
 	names       []string
 	description string
@@ -85,22 +113,31 @@ type Argument struct {
 
 	deflt      string
 	hasDefault bool
-	seen bool
+	seen       bool
 	
 	value      Value
 	behavior   Behavior
 }
 
-func String(names ...string) *Argument {
-	return argument(&StringValue{}, &Option{}, names...)
+func String(names ...string) *StringArgument {
+	arg := argument(&StringValue{}, &Option{}, names...)
+	return &StringArgument{
+		Argument: arg,
+	}
 }
 
-func Int(names ...string) *Argument {
-	return argument(&IntValue{}, &Option{}, names...)
+func Int(names ...string) *IntArgument {
+	arg := argument(&IntValue{}, &Option{}, names...)
+	return &IntArgument{
+		Argument: arg,
+	}
 }
 
-func Bool(names ...string) *Argument {
-	return argument(&BoolValue{}, &Flag{}, names...)
+func Bool(names ...string) *BoolArgument {
+	arg := argument(&BoolValue{}, &Option{}, names...)
+	return &BoolArgument{
+		Argument: arg,
+	}
 }
 
 func argument(value Value, behavior Behavior, names ...string) *Argument {
@@ -131,14 +168,14 @@ func (a *Argument) Required() *Argument {
 	return a
 }
 
-func (a *Argument) StringValue() string {
+func (a *StringArgument) Value() string {
 	return a.value.(*StringValue).Value
 }
 
-func (a *Argument) IntValue() int {
+func (a *IntArgument) Value() int {
 	return a.value.(*IntValue).Value
 }
 
-func (a *Argument) BoolValue() bool {
+func (a *BoolArgument) Value() bool {
 	return a.value.(*BoolValue).Value
 }

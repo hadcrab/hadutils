@@ -6,12 +6,13 @@ import (
 	"errors"
 )
 
-func Parse(argv []string, defs ...*Argument) ([]string, error) {
+func Parse(argv []string, defs ...Definition) ([]string, error) {
 	var positionals []string
 	for i := range defs {
-		defs[i].seen = false
-    	if defs[i].hasDefault {
-        	if err := defs[i].value.Set(defs[i].deflt); err != nil {
+		arg := defs[i].argument()
+		arg.seen = false
+    	if arg.hasDefault {
+        	if err := arg.value.Set(arg.deflt); err != nil {
             	return nil, err
          	}
      	}
@@ -25,8 +26,9 @@ func Parse(argv []string, defs ...*Argument) ([]string, error) {
 		name := strings.TrimLeft(token, "-")
 		var found *Argument
 		for argIndex := range defs {
-			if slices.Contains(defs[argIndex].names, name) {
-					found = defs[argIndex]
+			arg := defs[argIndex].argument()
+			if slices.Contains(arg.names, name) {
+					found = arg
 				}
 			if found != nil {
 				break
@@ -43,8 +45,9 @@ func Parse(argv []string, defs ...*Argument) ([]string, error) {
 		i += consumed
 	}
 	for i := range defs {
-		if !defs[i].seen && defs[i].required {
-			return nil, errors.New("required argument: " + defs[i].names[0])
+		arg := defs[i].argument()
+		if !arg.seen && arg.required {
+			return nil, errors.New("required argument: " + arg.names[0])
 		}
 	}
 	return positionals, nil
