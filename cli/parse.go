@@ -3,7 +3,6 @@ package cli
 import (
 	"slices"
 	"strings"
-	"errors"
 )
 
 func Parse(argv []string, defs ...Definition) ([]string, error) {
