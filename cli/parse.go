@@ -9,6 +9,7 @@ import (
 func Parse(argv []string, defs ...*Argument) ([]string, error) {
 	var positionals []string
 	for i := range defs {
+		defs[i].seen = false
     	if defs[i].hasDefault {
         	if err := defs[i].value.Set(defs[i].deflt); err != nil {
             	return nil, err
@@ -38,7 +39,13 @@ func Parse(argv []string, defs ...*Argument) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
+		found.seen = true
 		i += consumed
+	}
+	for i := range defs {
+		if !defs[i].seen && defs[i].required {
+			return nil, errors.New("required argument: " + defs[i].names[0])
+		}
 	}
 	return positionals, nil
 }
