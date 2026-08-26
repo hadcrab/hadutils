@@ -85,6 +85,8 @@ type Argument struct {
 
 	deflt      string
 	hasDefault bool
+	seen bool
+	
 	value      Value
 	behavior   Behavior
 }
