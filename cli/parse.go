@@ -1,21 +1,21 @@
 package cli
 
 import (
+	"errors"
 	"slices"
 	"strings"
 )
 
-func Parse(argv []string, defs ...Definition) ([]string, error) {
-	var positionals []string
-	for i := range defs {
-		arg := defs[i].argument()
-		arg.seen = false
-    	if arg.hasDefault {
-        	if err := arg.value.Set(arg.deflt); err != nil {
-            	return nil, err
-         	}
-     	}
+type definition interface {
+	meta() *Definition
+}
+
+func Parse(argv []string, defs ...definition) ([]string, error) {
+	for _, d := range defs {
+		d.meta().reset()
 	}
+
+	var positionals []string
 	for i := 0; i < len(argv); i++ {
 		token := argv[i]
 		if !strings.HasPrefix(token, "-") {
@@ -23,30 +23,28 @@ func Parse(argv []string, defs ...Definition) ([]string, error) {
 			continue
 		}
 		name := strings.TrimLeft(token, "-")
-		var found *Argument
-		for argIndex := range defs {
-			arg := defs[argIndex].argument()
-			if slices.Contains(arg.names, name) {
-					found = arg
-				}
-			if found != nil {
+		var found definition
+		for _, d := range defs {
+			if slices.Contains(d.meta().names, name) {
+				found = d
 				break
 			}
 		}
 		if found == nil {
 			return nil, errors.New("unknown argument: " + token)
 		}
-		consumed, err := found.behavior.Parse(argv[i+1:], found.TakeValue)
+		consumed, err := found.meta().take(argv[i+1:])
 		if err != nil {
 			return nil, err
 		}
-		found.seen = true
+		found.meta().seen = true
 		i += consumed
 	}
-	for i := range defs {
-		arg := defs[i].argument()
-		if !arg.seen && arg.required {
-			return nil, errors.New("required argument: " + arg.names[0])
+
+	for _, d := range defs {
+		m := d.meta()
+		if m.required && !m.seen {
+			return nil, errors.New("required argument missing: " + m.names[0])
 		}
 	}
 	return positionals, nil
