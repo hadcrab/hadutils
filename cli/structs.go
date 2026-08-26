@@ -5,58 +5,16 @@ import (
 	"strconv"
 )
 
-type Value interface {
-	String() string
-	Set(string) error
+func parseInt(value string) (int, error) {
+	return strconv.Atoi(value)
 }
 
-type StringValue struct {
-	Value string
+func parseBool(value string) (bool, error) {
+	return strconv.ParseBool(value)
 }
 
-func (v *StringValue) String() string {
-	return v.Value
-}
-
-func (v *StringValue) Set(value string) error {
-	v.Value = value
-	return nil
-}
-
-type IntValue struct {
-	Value int
-}
-
-func (v *IntValue) String() string {
-	return strconv.Itoa(v.Value)
-}
-
-func (v *IntValue) Set(value string) error {
-	parsed, err := strconv.Atoi(value)
-	if err != nil {
-		return err
-	}
-
-	v.Value = parsed
-	return nil
-}
-
-type BoolValue struct {
-	Value bool
-}
-
-func (v *BoolValue) String() string {
-	return strconv.FormatBool(v.Value)
-}
-
-func (v *BoolValue) Set(value string) error {
-	parsed, err := strconv.ParseBool(value)
-	if err != nil {
-		return err
-	}
-
-	v.Value = parsed
-	return nil
+func parseString(value string) (string, error) {
+	return value, nil
 }
 
 type Behavior interface {
@@ -78,67 +36,86 @@ func (o Option) Parse(args []string, set func(string) error) (int, error) {
 	return 1, set(args[0])
 }
 
-type Argument struct {
+type Definition struct {
 	names       []string
 	description string
 	required    bool
+	hasDefault  bool
+	seen        bool
+	behavior    Behavior
 
-	deflt      string
-	hasDefault bool
-	seen bool
-	
-	value      Value
-	behavior   Behavior
+	reset func()
+	take  func(tokens []string) (int, error)
 }
 
-func String(names ...string) *Argument {
-	return argument(&StringValue{}, &Option{}, names...)
+type Argument[T any] struct {
+	definition Definition
+	deflt      T
+	value      T
+	parseFn    func(string) (T, error)
 }
 
-func Int(names ...string) *Argument {
-	return argument(&IntValue{}, &Option{}, names...)
+func String(names ...string) *Argument[string] {
+	return argument("", &Option{}, parseString, names...)
 }
 
-func Bool(names ...string) *Argument {
-	return argument(&BoolValue{}, &Flag{}, names...)
+func Int(names ...string) *Argument[int] {
+	return argument(0, &Option{}, parseInt, names...)
 }
 
-func argument(value Value, behavior Behavior, names ...string) *Argument {
-	return &Argument{
-		names:    names,
-		value:    value,
-		behavior: behavior,
+func Bool(names ...string) *Argument[bool] {
+	return argument(false, &Flag{}, parseBool, names...)
+}
+
+func argument[T any](deflt T, behavior Behavior, parseFn func(string) (T, error), names ...string) *Argument[T] {
+	a := &Argument[T]{
+		definition: Definition{
+			names:    names,
+			behavior: behavior,
+		},
+		deflt:   deflt,
+		parseFn: parseFn,
 	}
-}
-
-func (a *Argument) TakeValue(val string) error {
-	return a.value.Set(val)
-}
-
-func (a *Argument) Description(description string) *Argument {
-	a.description = description
+	a.value = deflt
+	a.definition.reset = func() {
+		a.value = a.deflt
+		a.definition.seen = false
+	}
+	a.definition.take = func(tokens []string) (int, error) {
+		return behavior.Parse(tokens, a.takeValue)
+	}
 	return a
 }
 
-func (a *Argument) Default(value string) *Argument {
+func (a *Argument[T]) takeValue(val string) error {
+	parsed, err := a.parseFn(val)
+	if err != nil {
+		return err
+	}
+	a.value = parsed
+	return nil
+}
+
+func (a *Argument[T]) Description(description string) *Argument[T] {
+	a.definition.description = description
+	return a
+}
+
+func (a *Argument[T]) Default(value T) *Argument[T] {
 	a.deflt = value
-	a.hasDefault = true
+	a.definition.hasDefault = true
 	return a
 }
 
-func (a *Argument) Required() *Argument {
-	a.required = true
+func (a *Argument[T]) Required() *Argument[T] {
+	a.definition.required = true
 	return a
 }
 
-func (a *Argument) StringValue() string {
-	return a.value.(*StringValue).Value
+func (a *Argument[T]) Value() T {
+	return a.value
 }
 
-func (a *Argument) IntValue() int {
-	return a.value.(*IntValue).Value
-}
-
-func (a *Argument) BoolValue() bool {
-	return a.value.(*BoolValue).Value
+func (a *Argument[T]) meta() *Definition {
+	return &a.definition
 }
