@@ -15,6 +15,13 @@ func Parse(argv []string, defs ...definition) ([]string, error) {
 		d.meta().reset()
 	}
 
+	for _, d := range defs {
+		m := d.meta()
+		if m.required && m.hasDefault {
+			return nil, errors.New("argument cannot be required if has default value: " + m.names[0])
+		}
+	} 
+	
 	var positionals []string
 	for i := 0; i < len(argv); i++ {
 		token := argv[i]
