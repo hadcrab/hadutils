@@ -2,37 +2,33 @@ package main
 
 import (
 	"errors"
-	"flag"
 	"strings"
+	"os"
+
+	"github.com/hadcrab/hadutils/cli"
 	"github.com/hadcrab/hadutils/internal/hash"
 )
 
-const defaultAlgorithm = "SHA256" 
+const defaultAlgorithm = "sha256" 
 
 func collectArgs() (Config, error) {
-	var (
-		algo string
-		quiet bool
-		copyToClipboard bool
-	)
-	flag.StringVar(&algo, "a", defaultAlgorithm, "Algorithm")
-	flag.StringVar(&algo, "algorithm", defaultAlgorithm, "Algorithm")
-	flag.BoolVar(&quiet, "q", false, "Print only hash")
-	flag.BoolVar(&quiet, "quiet", false, "Print only hash")
-	flag.BoolVar(&copyToClipboard, "c", false, "Quietly copy hash to clipboard")
-	flag.BoolVar(&copyToClipboard, "copy", false, "Quietly copy hash to clipboard")
-	flag.Parse()
-	algorithm := hash.Algorithm(strings.ToLower(algo))
-	args := flag.Args()
-	
+	input := os.Args
+	algo := cli.String("algorithm", "a").Default(defaultAlgorithm).Description("Algorithm")
+	quiet := cli.Bool("quiet", "q").Description("Print only hash")
+	copyToClipboard := cli.Bool("copy", "c").Description("Copy hash quietly to clipboard")
+	args, err := cli.Parse(input[1:], algo, quiet, copyToClipboard)
+	algorithm := hash.Algorithm(strings.ToLower(algo.Value()))
+	if err != nil {
+		return Config{}, err
+	}
 	if len(args) < 1 {
     	return Config{}, errors.New("At least one file path is required")
 	}
 	cfg := Config{
 		Path: args,
 		Algorithm: algorithm,
-		Quiet: quiet,
-		CopyToClipboard: copyToClipboard,
+		Quiet: quiet.Value(),
+		CopyToClipboard: copyToClipboard.Value(),
 	}
 	
 	return cfg, nil
