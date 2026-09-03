@@ -2,7 +2,6 @@ package cli
 
 import (
 	"errors"
-	"slices"
 	"strings"
 )
 
@@ -24,18 +23,32 @@ func Parse(argv []string, defs ...definition) ([]string, error) {
 	
 	var positionals []string
 	for i := 0; i < len(argv); i++ {
+		var nameLong string
+		var nameShort string
 		token := argv[i]
-		if !strings.HasPrefix(token, "-") {
+		if strings.HasPrefix(token, "--") {
+			nameLong = strings.TrimPrefix(token, "--")
+		} else if strings.HasPrefix(token, "-") {
+        	nameShort = strings.TrimPrefix(token, "-")
+		} else {
 			positionals = append(positionals, token)
 			continue
 		}
-		name := strings.TrimLeft(token, "-")
 		var found definition
 		for _, d := range defs {
-			if slices.Contains(d.meta().names, name) {
-				found = d
-				break
+			for _, name := range d.meta().names {
+				if name != "" && len(name) > 1 && name == nameLong {
+					found = d
+					break
+				} 
+				if name != "" && len(name) == 1 && name == nameShort {
+					found = d
+					break
+				}
 			}
+   			if found != nil {
+        		break
+      		}
 		}
 		if found == nil {
 			return nil, errors.New("unknown argument: " + token)
