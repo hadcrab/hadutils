@@ -31,6 +31,12 @@ func Parse(argv []string, defs ...definition) ([]string, error) {
 			continue
 		}
 
+		// positional with names containing -, --
+		if token == "--" {
+			positionals = append(positionals, argv[i+1:]...)
+			break
+		}
+		
 		// long form: --name
 		if strings.HasPrefix(token, "--") {
 			name := strings.TrimPrefix(token, "--")
