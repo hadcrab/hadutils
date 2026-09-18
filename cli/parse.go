@@ -98,3 +98,32 @@ func lookupDefinitionByName(name string, short bool, defs ...definition) definit
 	}
 	return nil
 }
+
+func formatNames(names []string) string {
+	var result strings.Builder
+	var hasName bool
+	for _, name := range names {
+		if len(name) == 1 {
+			if hasName {
+				result.WriteString(", ")
+			}
+			result.WriteString("-")
+			result.WriteString(name)
+			hasName = true
+		}
+	}
+	if !hasName {
+		result.WriteString("    ")
+	}
+	for _, name := range names {
+		if len(name) > 1 {
+			if hasName {
+				result.WriteString(", ")
+			}
+			result.WriteString("--")
+			result.WriteString(name)
+			hasName = true
+		}
+	}
+	return result.String()
+}
