@@ -127,3 +127,28 @@ func formatNames(names []string) string {
 	}
 	return result.String()
 }
+
+func Help(defs ...definition) string {
+	var message strings.Builder
+	var maxWidth int
+	const gap = 3
+	for _, def := range defs {
+  		names := formatNames(def.meta().names)
+    	if len(names) > maxWidth {
+    		maxWidth = len(names)
+    	}		
+	}
+	for _, def := range defs {
+		meta := def.meta()
+  		names := formatNames(def.meta().names)
+  		if message.Len() > 1 {
+			message.WriteString("\n")
+		}
+    	message.WriteString("  ")
+		message.WriteString(names)
+		message.WriteString(strings.Repeat(" ", maxWidth - len(names) + gap))
+		message.WriteString(meta.description)
+	}
+	result := message.String()
+	return result
+}
