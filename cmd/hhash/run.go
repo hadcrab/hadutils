@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	//"os"
-	"github.com/hadcrab/hadutils/internal/hash"
-	"github.com/hadcrab/hadutils/internal/env"
+	"os"
+
 	"github.com/hadcrab/hadutils/internal/clipboard"
+	"github.com/hadcrab/hadutils/internal/env"
+	"github.com/hadcrab/hadutils/internal/hash"
 )
 
 func run() error {
@@ -16,7 +17,13 @@ func run() error {
 	}
 	
 	for _, path := range cfg.Path {
-		sum, err := hash.Compute(path, cfg.Algorithm)
+		var sum string
+		var err error
+		if path == "-" {
+			sum, err = hash.ComputeReader(os.Stdin, cfg.Algorithm)
+		} else {
+			sum, err = hash.Compute(path, cfg.Algorithm)
+		}
 		if err != nil {
 			return err
 		}
