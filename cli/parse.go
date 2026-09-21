@@ -31,6 +31,12 @@ func Parse(argv []string, defs ...definition) ([]string, error) {
 			continue
 		}
 
+		// handle - token as positional
+		if token == "-" {
+    		positionals = append(positionals, token)
+      		continue
+		}
+
 		// positional with names containing -, --
 		if token == "--" {
 			positionals = append(positionals, argv[i+1:]...)
