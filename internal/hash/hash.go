@@ -28,22 +28,25 @@ func Compute(path string, algorithm Algorithm) (string, error) {
 		return "", err
 	}
 	defer file.Close()
+	return ComputeReader(file, algorithm)
+}
+
+func ComputeReader(r io.Reader, algorithm Algorithm) (string, error) {
 	var h hash.Hash
 	switch algorithm {
-		case SHA256:
-			h = sha256.New()
-		case SHA512:
-			h = sha512.New()
-		case SHA1:
-			h = sha1.New()
-		case MD5:
-			h = md5.New()			
-		default:
-    		return "", fmt.Errorf("unsupported algorithm: %s", algorithm)
+	case SHA256:
+		h = sha256.New()
+	case SHA512:
+		h = sha512.New()
+	case SHA1:
+		h = sha1.New()
+	case MD5:
+		h = md5.New()
+	default:
+		return "", fmt.Errorf("unsupported algorithm: %s", algorithm)
 	}
-	_, err = io.Copy(h, file)
-	if err != nil {
+	if _, err := io.Copy(h, r); err != nil {
 		return "", err
 	}
-    return hex.EncodeToString(h.Sum(nil)), nil	
+	return hex.EncodeToString(h.Sum(nil)), nil
 }
