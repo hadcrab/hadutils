@@ -2,14 +2,14 @@ package main
 
 import (
 	"errors"
-	"strings"
 	"os"
+	"strings"
 
 	"github.com/hadcrab/hadutils/cli"
 	"github.com/hadcrab/hadutils/internal/hash"
 )
 
-const defaultAlgorithm = "sha256" 
+const defaultAlgorithm = "sha256"
 
 func collectArgs() (Config, error) {
 	input := os.Args
@@ -22,14 +22,14 @@ func collectArgs() (Config, error) {
 		return Config{}, err
 	}
 	if len(args) < 1 {
-    	return Config{}, errors.New("At least one file path is required")
+		return Config{}, errors.New("At least one file path is required")
 	}
 	cfg := Config{
-		Path: args,
-		Algorithm: algorithm,
-		Quiet: quiet.Value(),
+		Path:            args,
+		Algorithm:       algorithm,
+		Quiet:           quiet.Value(),
 		CopyToClipboard: copyToClipboard.Value(),
 	}
-	
+
 	return cfg, nil
 }

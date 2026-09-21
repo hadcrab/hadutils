@@ -33,8 +33,8 @@ func Parse(argv []string, defs ...definition) ([]string, error) {
 
 		// handle - token as positional
 		if token == "-" {
-    		positionals = append(positionals, token)
-      		continue
+			positionals = append(positionals, token)
+			continue
 		}
 
 		// positional with names containing -, --
@@ -42,7 +42,7 @@ func Parse(argv []string, defs ...definition) ([]string, error) {
 			positionals = append(positionals, argv[i+1:]...)
 			break
 		}
-		
+
 		// long form: --name
 		if strings.HasPrefix(token, "--") {
 			name := strings.TrimPrefix(token, "--")
@@ -139,20 +139,20 @@ func Help(defs ...definition) string {
 	var maxWidth int
 	const gap = 3
 	for _, def := range defs {
-  		names := formatNames(def.meta().names)
-    	if len(names) > maxWidth {
-    		maxWidth = len(names)
-    	}		
+		names := formatNames(def.meta().names)
+		if len(names) > maxWidth {
+			maxWidth = len(names)
+		}
 	}
 	for _, def := range defs {
 		meta := def.meta()
-  		names := formatNames(def.meta().names)
-  		if message.Len() > 1 {
+		names := formatNames(def.meta().names)
+		if message.Len() > 1 {
 			message.WriteString("\n")
 		}
-    	message.WriteString("  ")
+		message.WriteString("  ")
 		message.WriteString(names)
-		message.WriteString(strings.Repeat(" ", maxWidth - len(names) + gap))
+		message.WriteString(strings.Repeat(" ", maxWidth-len(names)+gap))
 		message.WriteString(meta.description)
 	}
 	result := message.String()

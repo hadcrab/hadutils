@@ -15,7 +15,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	
+
 	for _, path := range cfg.Path {
 		var sum string
 		var err error
@@ -31,7 +31,7 @@ func run() error {
 			clipboard.CopyIn(sum, env.Clipboard)
 			// todo: make it work with multiple files
 			return nil
-    	}
+		}
 		if cfg.Quiet {
 			fmt.Println(sum)
 		} else {

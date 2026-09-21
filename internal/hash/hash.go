@@ -16,10 +16,10 @@ type Algorithm string
 
 const (
 	UnknownAlgorithm Algorithm = ""
-    SHA256 Algorithm = "sha256"
-    SHA512 Algorithm = "sha512"
-    SHA1 Algorithm = "sha1"
-    MD5 Algorithm = "md5"
+	SHA256           Algorithm = "sha256"
+	SHA512           Algorithm = "sha512"
+	SHA1             Algorithm = "sha1"
+	MD5              Algorithm = "md5"
 )
 
 func Compute(path string, algorithm Algorithm) (string, error) {

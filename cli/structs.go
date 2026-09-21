@@ -68,21 +68,21 @@ func Bool(names ...string) *Argument[bool] {
 }
 
 func normalizeNames(names []string) []string {
-    if len(names) == 0 {
-        return names
-    }
+	if len(names) == 0 {
+		return names
+	}
 
-    longest := 0
+	longest := 0
 
-    for i := 1; i < len(names); i++ {
-        if len(names[i]) > len(names[longest]) {
-            longest = i
-        }
-    }
+	for i := 1; i < len(names); i++ {
+		if len(names[i]) > len(names[longest]) {
+			longest = i
+		}
+	}
 
-    names[0], names[longest] = names[longest], names[0]
+	names[0], names[longest] = names[longest], names[0]
 
-    return names
+	return names
 }
 
 func argument[T any](deflt T, behavior Behavior, parseFn func(string) (T, error), names ...string) *Argument[T] {
