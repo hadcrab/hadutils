@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/hadcrab/hadutils/internal/clipboard"
 	"github.com/hadcrab/hadutils/internal/env"
@@ -12,6 +13,7 @@ import (
 func run() error {
 	env := env.Collect()
 	cfg, err := collectArgs()
+	var sums []string
 	if err != nil {
 		return err
 	}
@@ -28,15 +30,21 @@ func run() error {
 			return err
 		}
 		if cfg.CopyToClipboard {
-			clipboard.CopyIn(sum, env.Clipboard)
-			// todo: make it work with multiple files
-			return nil
+			sums = append(sums, sum)
+			continue
 		}
 		if cfg.Quiet {
 			fmt.Println(sum)
 		} else {
 			PrintResult(path, string(cfg.Algorithm), sum)
 		}
+	}
+	if cfg.CopyToClipboard {
+		stringToCopy := strings.Join(sums, "\n")
+		if err := clipboard.CopyIn(stringToCopy, env.Clipboard); err != nil {
+			return err
+		}
+		return nil
 	}
 	return nil
 }
