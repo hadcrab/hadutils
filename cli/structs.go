@@ -121,6 +121,7 @@ func (a *Argument[T]) Description(description string) *Argument[T] {
 
 func (a *Argument[T]) Default(value T) *Argument[T] {
 	a.deflt = value
+	a.value = value
 	a.definition.hasDefault = true
 	return a
 }
