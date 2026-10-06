@@ -118,7 +118,7 @@ func formatNames(names []string) string {
 			hasName = true
 		}
 	}
-	if !hasName {
+	if len(names) == 0 {
 		result.WriteString("    ")
 	}
 	for _, name := range names {
