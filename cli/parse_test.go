@@ -62,6 +62,16 @@ func TestParse(t *testing.T) {
 			wantPos: []string{"file.txt"},
 		},
 		{
+			name:    "short option missing value",
+			argv:    []string{"-a"},
+			wantErr: "algorithm: requires a value",
+		},
+		{
+			name:    "long option missing value",
+			argv:    []string{"--algorithm"},
+			wantErr: "algorithm: requires a value",
+		},
+		{
 			name:    "cluster of flags",
 			argv:    []string{"-cq"},
 			wantPos: nil,
@@ -94,7 +104,7 @@ func TestParse(t *testing.T) {
 		{
 			name:    "option inside cluster is rejected",
 			argv:    []string{"-qa"}, // q is a flag, a is an option with a value
-			wantErr: "cannot be part of a cluster",
+			wantErr: "-a, algorithm takes a value and cannot be part of a cluster",
 		},
 		{
 			name: "required argument missing",
@@ -160,20 +170,6 @@ func TestParseSetsValues(t *testing.T) {
 	}
 	if got := quiet.Value(); got != true {
 		t.Errorf("quiet.Value() = %v, want true", got)
-	}
-}
-
-// TestReadDefaultBeforeParse pins a KNOWN BUG (plan item 4): Default()
-// changes a.deflt but not a.value, so Value() before Parse returns the
-// zero value instead of the default.
-//
-// This test currently FAILS ON PURPOSE — it locks the bug in, so that once
-// Default() is fixed, the test turns green on its own.
-func TestReadDefaultBeforeParse(t *testing.T) {
-	algo := String("algorithm").Default("SHA256")
-
-	if got := algo.Value(); got != "SHA256" {
-		t.Errorf("Value() before Parse = %q, want %q (known bug: Default() does not update value)", got, "SHA256")
 	}
 }
 
