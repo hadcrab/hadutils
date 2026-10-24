@@ -67,11 +67,12 @@ func Bool(names ...string) *Argument[bool] {
 	return argument(false, &Flag{}, parseBool, names...)
 }
 
-func normalizeNames(names []string) []string {
-	if len(names) == 0 {
-		return names
+func normalizeNames(rawNames []string) []string {
+	if len(rawNames) == 0 {
+		return rawNames
 	}
-
+	names := append([]string(nil), rawNames...)
+	
 	longest := 0
 
 	for i := 1; i < len(names); i++ {
