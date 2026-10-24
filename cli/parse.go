@@ -2,6 +2,7 @@ package cli
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -52,7 +53,7 @@ func Parse(argv []string, defs ...definition) ([]string, error) {
 			}
 			consumed, err := def.meta().take(argv[i+1:])
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("%s: %v", def.meta().names[0], err)
 			}
 			def.meta().seen = true
 			i += consumed
@@ -67,14 +68,15 @@ func Parse(argv []string, defs ...definition) ([]string, error) {
 			if def == nil {
 				return nil, errors.New("unknown argument: -" + string(char))
 			}
+			meta := def.meta()
 			if len(name) > 1 {
 				if _, isFlag := def.meta().behavior.(*Flag); !isFlag {
-					return nil, errors.New("-" + string(char) + " takes a value and cannot be part of a cluster")
+					return nil, errors.New("-" + string(char) + ", " + meta.names[0] + " takes a value and cannot be part of a cluster")
 				}
 			}
 			tokensTaken, err := def.meta().take(argv[i+1:])
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("%s: %v", def.meta().names[0], err)
 			}
 			def.meta().seen = true
 			consumed += tokensTaken
